@@ -897,6 +897,11 @@ class ScriptRunner(NotebookMixin, Task):
         Script parameters. This are passed as the "parameters" argument
         to the papermill.execute_notebook function, by default, "product"
         and "upstream" are included
+    kernelspec_name: str, optional
+        Kernelspec name to use, if the file extension provides with enough
+        information to choose a kernel or the notebook already includes
+        kernelspec data (in metadata.kernelspec), this is ignored, otherwise,
+        the kernel is looked up using jupyter_client.kernelspec.get_kernel_spec
     ext_in: str, optional
         Source extension. Required if loading from a str. If source is a
         ``pathlib.Path``, the extension from the file is used.
@@ -947,15 +952,19 @@ class ScriptRunner(NotebookMixin, Task):
         dag,
         name=None,
         params=None,
+        kernelspec_name=None,
         ext_in=None,
         static_analysis="regular",
         local_execution=False,
+        check_if_kernel_installed=True,
     ):
         self.ext_in = ext_in
+        self.kernelspec_name = kernelspec_name
+        self.check_if_kernel_installed = check_if_kernel_installed
 
         kwargs = dict(hot_reload=dag._params.hot_reload)
         self._source = ScriptRunner._init_source(
-            source, kwargs, ext_in, static_analysis, False, False
+            source, kwargs, ext_in, kernelspec_name, static_analysis, check_if_kernel_installed, False, False
         )
         self.local_execution = local_execution
         super().__init__(product, dag, name, params)
@@ -965,15 +974,17 @@ class ScriptRunner(NotebookMixin, Task):
         source,
         kwargs,
         ext_in=None,
+        kernelspec_name=None,
         static_analysis="regular",
+        check_if_kernel_installed=False,
         extract_up=False,
         extract_prod=False,
     ):
         ns = NotebookSource(
             source,
             ext_in=ext_in,
-            static_analysis=static_analysis,
             kernelspec_name=None,
+            static_analysis=static_analysis,
             check_if_kernel_installed=False,
             **kwargs,
         )

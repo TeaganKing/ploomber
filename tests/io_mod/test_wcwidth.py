@@ -10,8 +10,8 @@ from ploomber.io.wcwidth import wcswidth, wcwidth
         ("a", 1),
         ("1", 1),
         ("א", 1),
-        ("\u200B", 0),
-        ("\u1ABE", 0),
+        ("\u200B", 0),  #noqa
+        ("\u1ABE", 0),  #noqa
         ("\u0591", 0),
         ("🉐", 2),
         ("＄", 2),
